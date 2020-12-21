@@ -132,14 +132,14 @@ def get_sizes(positions):
     return positions
         
 
-def plot_avg_map(positions, ax) -> dict:
+def plot_avg_map(positions, ax, color="green") -> dict:
     # Adds player object to dictionnary
     positions = get_sizes(positions)
     for name, v in positions.items():
         avg_pos = v["avg_pos"]
         nb_t = v["n_touch"]
         jersey = v["jersey"]
-        bbox = dict(facecolor='green', edgecolor='green', boxstyle=f'circle,pad={nb_t}', alpha=0.7)
+        bbox = dict(facecolor=color, edgecolor=color, boxstyle=f'circle,pad={nb_t}', alpha=0.7)
         obj = ax.text(avg_pos[0], avg_pos[1], jersey, color="black", bbox=bbox)
         
         positions[name]["obj"] = obj
