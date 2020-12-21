@@ -72,11 +72,6 @@ else:
     plot_circuits(df_team_pass, away, positions, ax)
 st.pyplot(fig)
 
-##### Histogram #####
-st.header("Type of pass per team")
-st.pyplot(display_hist(df))
-
-
 ##### Composition #####
 if st.checkbox("Show composition"):
     if team == TEAM[0]:
@@ -84,6 +79,9 @@ if st.checkbox("Show composition"):
     else:
         st.text(show_composition(away))
 
+##### Histogram #####
+st.header("Type of pass per team")
+st.pyplot(display_hist(df))
 
 ##### Contact #####
 expander = st.beta_expander("Contact")
