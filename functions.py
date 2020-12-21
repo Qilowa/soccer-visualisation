@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Arc
 import pandas as pd
 import json
+import streamlit as st
 
 LABELS = ['id', 'index', 'period', 'timestamp', 'minute', 'second', 'type', 'possession', 'possession_team', 'play_pattern', 'off_camera', 'team', 'player', 'position', 'location', 'duration', 'under_pressure', 'related_events', 'pass']
 TO_DROP = ["id", 'index', 'period', 'timestamp', 'second', 'possession', 'off_camera']
@@ -76,8 +77,8 @@ def get_avg_pos(df, player):
             avgX += location[0]
             avgY += location[1]
             n += 1
-        
-    return (avgX/n, avgY/n), n
+
+    return (avgX, avgY), n
 
 def get_circuit(df, player) -> list:
     interest = df.loc[(df["player"] == player) & (df["type"] == "Pass")]
@@ -93,12 +94,10 @@ def get_team_avg(df, lineup):
     for player in lineup["lineup"]:
         name = player["player"]["name"]
         jersey = player["jersey_number"]
-        try:
-            avg, n = get_avg_pos(df, name)
-            dic[name] = { "avg_pos" : avg, "n_touch": n, "jersey": jersey}
-        except:
-            pass
-        
+        avg, n = get_avg_pos(df, name)        
+        if n != 0:
+            dic[name] = { "avg_pos" : (avg[0]/n, avg[1]/n), "n_touch": n, "jersey": jersey}
+       
     return dic
 
 
@@ -149,7 +148,8 @@ def plot_avg_map(positions, ax, color="green") -> dict:
     return positions
     
 IDK = 100
-        
+
+#@st.cache(allow_output_mutation=True)
 def plot_circuits(df, team, positions, ax):
     circuits = get_team_circuits(df, team)
     total = sum([x for x in circuits.values()])
@@ -221,7 +221,7 @@ def create_pitch():
     ax.add_patch(rightArc)
 
     #Tidy Axes
-    #plt.axis('off')
+    plt.axis('off')
     return fig, ax
 
 def get_pass_df(df):

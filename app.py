@@ -3,8 +3,12 @@ import numpy as np
 import pandas as pd
 import json
 import time
+from collections import OrderedDict
+from operator import itemgetter 
     
 from functions import *
+
+st.set_page_config(page_title="Pass Net WC18",page_icon="index.png")
 
 DIR = "worldcup"
 
@@ -22,7 +26,10 @@ file = st.sidebar.select_slider(
 PATH = os.path.join(DIR, file)
 
 # Get data
-compositions, events = get_comp_events(PATH) 
+compositions, events = get_comp_events(PATH)
+
+#Order compositions by alphabetic order
+compositions.sort(key=lambda x: x["team"]["name"])
 
 # Creation of dataframe
 df = get_df(events)
@@ -48,6 +55,9 @@ passes = get_pass_df(df)
 PASS_HEIGHT = list(passes.height_pass.unique()) + ["All"]
 TEAM = list(passes.team.unique())
 
+# Sort TEAM to have the same order
+TEAM.sort()
+
 height_pass = st.sidebar.radio(
     "What type of pass",
     PASS_HEIGHT
@@ -64,6 +74,7 @@ df_team_pass = get_height_df(df_team, height_pass) # get type of pass
 
 if team == TEAM[0]:
     positions = get_team_avg(df_team_pass, home)
+    # print(positions)
     positions = plot_avg_map(positions, ax, color="green")
     plot_circuits(df_team_pass, home, positions, ax)
 else:
@@ -80,7 +91,7 @@ if st.checkbox("Show composition"):
         st.text(show_composition(away))
 
 ##### Histogram #####
-st.header("Type of pass per team")
+st.header("Types of pass")
 st.pyplot(display_hist(df))
 
 ##### Contact #####
