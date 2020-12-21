@@ -42,8 +42,8 @@ def get_df(events):
     return df
 
 def get_formations(compositions):
-    home = {"formation": compositions[0]["tactics"]["formation"], "lineup": compositions[0]["tactics"]["lineup"]}
-    away = home = {"formation": compositions[1]["tactics"]["formation"], "lineup": compositions[1]["tactics"]["lineup"]}
+    home = {"team": compositions[0]["team"]["name"], "formation": compositions[0]["tactics"]["formation"], "lineup": compositions[0]["tactics"]["lineup"]}
+    away = {"team":compositions[1]["team"]["name"], "formation": compositions[1]["tactics"]["formation"], "lineup": compositions[1]["tactics"]["lineup"]}
 
     return home, away
         
@@ -70,7 +70,6 @@ def create_data_pass(passes) -> pd.DataFrame:
 def get_avg_pos(df, player):
     interest = df.loc[(df["player"] == player)]
     avgX, avgY, n = 0, 0, 0
-    
     for i, row in interest.iterrows():
         if row["location"] is not None:
             location = row["location"]
@@ -94,8 +93,11 @@ def get_team_avg(df, lineup):
     for player in lineup["lineup"]:
         name = player["player"]["name"]
         jersey = player["jersey_number"]
-        avg, n = get_avg_pos(df, name)
-        dic[name] = { "avg_pos" : avg, "n_touch": n, "jersey": jersey}
+        try:
+            avg, n = get_avg_pos(df, name)
+            dic[name] = { "avg_pos" : avg, "n_touch": n, "jersey": jersey}
+        except:
+            pass
         
     return dic
 
@@ -139,7 +141,7 @@ def plot_avg_map(positions, ax, color="green") -> dict:
         avg_pos = v["avg_pos"]
         nb_t = v["n_touch"]
         jersey = v["jersey"]
-        bbox = dict(facecolor=color, edgecolor=color, boxstyle=f'circle,pad={nb_t}', alpha=0.7)
+        bbox = dict(facecolor=color, edgecolor=color, boxstyle=f'circle,pad={nb_t}', alpha=0.5)
         obj = ax.text(avg_pos[0], avg_pos[1], jersey, color="black", bbox=bbox)
         
         positions[name]["obj"] = obj
@@ -221,3 +223,35 @@ def create_pitch():
     #Tidy Axes
     #plt.axis('off')
     return fig, ax
+
+def get_pass_df(df):
+    return df.loc[(df["type"] == "Pass")].copy()
+
+def get_team_df(df, team):
+    return df.loc[df["team"] == team].copy()
+
+def get_height_df(df, height):
+    if height == "All":
+        return df
+    else:
+        return df.loc[df["height_pass"] == height].copy()
+
+def show_composition(team):
+    string = ""
+    for player in team["lineup"]:
+        string += f'{player["jersey_number"]}: {player["player"]["name"]}\n'
+    return string
+
+def display_hist(df):
+    teams = list(df.team.unique())
+    res = {}
+    for t in teams:
+        temp = df.loc[(df["team"] == t) & ((df["height_pass"].notnull()))].copy()
+        #print(temp.height_pass)
+        res[t] = list(temp["height_pass"])
+        
+    fig, ax = plt.subplots()    
+    ax.hist(res.values(), label=list(res.keys()))
+    ax.legend()
+
+    return fig
