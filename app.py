@@ -32,7 +32,8 @@ compositions, events = get_comp_events(PATH)
 compositions.sort(key=lambda x: x["team"]["name"])
 
 # Creation of dataframe
-df = get_df(events)
+# change location of the away team (125, 90)
+df = get_df(events, compositions[1]["team"]["name"])
 
 # Getting informations on teams
 home, away = get_formations(compositions)
@@ -81,6 +82,7 @@ else:
     positions = get_team_avg(df_team_pass, away)
     positions = plot_avg_map(positions, ax, color="red")
     plot_circuits(df_team_pass, away, positions, ax)
+
 st.pyplot(fig)
 
 ##### Composition #####
@@ -94,6 +96,32 @@ if st.checkbox("Show composition"):
 st.header("Types of pass")
 st.pyplot(display_hist(df))
 
+
+##### Average positions #####
+st.header("Average positions")
+
+avg_fig, avg_ax = create_pitch()
+
+df_team1 = get_height_df(df_team, "All")
+df_team2 = get_height_df(df_team, "All")
+
+# Home Team
+positions1 = get_team_avg(df_team1, home)
+positions1 = plot_avg_map(positions1, avg_ax, color="green")
+
+# Away team
+positions2 = get_team_avg(df_team2, away)
+positions2 = plot_avg_map(positions2, avg_ax, color="red")
+
+print(positions2)
+
+plot_avg_map(positions1, avg_ax)
+plot_avg_map(positions2, avg_ax)
+
+st.pyplot(avg_fig)
+
+
 ##### Contact #####
 expander = st.beta_expander("Contact")
 expander.write("Email : quentinsinh@gmail.com")
+expander.write("Github : https://github.com/Qilowa/soccer-visualisation")

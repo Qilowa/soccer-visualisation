@@ -34,12 +34,20 @@ def get_comp_events(path):
         data = json.load(json_file)
 
     return data[:2], data[2:]
+
+def opp_pos(liste):
+    if liste is not None:
+        return [125-liste[0], 90-liste[1]]
+    return None
         
-def get_df(events):
+@st.cache
+def get_df(events, team):
     df = pd.DataFrame(clean_list(events), columns=LABELS)
     clean_df(df)
     df = create_data_pass(df)
     df = df.drop(columns=TO_DROP)
+    df.loc[df["team"] == team, "location"] = df.loc[df["team"] == team, "location"].apply(opp_pos)
+    df.loc[df["team"] == team, "end_location_pass"] = df.loc[df["team"] == team, "end_location_pass"].apply(opp_pos)
     return df
 
 def get_formations(compositions):
@@ -89,6 +97,7 @@ def get_circuit(df, player) -> list:
             circuits.append([row["player"], receipt])
     return circuits
 
+#@st.cache
 def get_team_avg(df, lineup):
     dic = dict()
     for player in lineup["lineup"]:
@@ -149,7 +158,7 @@ def plot_avg_map(positions, ax, color="green") -> dict:
     
 IDK = 100
 
-#@st.cache(allow_output_mutation=True)
+#@st.cache
 def plot_circuits(df, team, positions, ax):
     circuits = get_team_circuits(df, team)
     total = sum([x for x in circuits.values()])
@@ -255,3 +264,4 @@ def display_hist(df):
     ax.legend()
 
     return fig
+
